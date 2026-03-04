@@ -63,7 +63,7 @@ export function SidebarLeft({
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-           <Image height={100} width={250} alt="Cris PR logo" src='/logo.png' />
+           <Image height={100} width={250} alt="Cris PR logo" src='/logo.PNG' />
       </SidebarHeader>
       <SidebarContent>
         <NavFavorites favorites={data.favorites} />
