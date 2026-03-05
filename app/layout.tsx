@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarLeft } from "@/components/sidebar-left";
 import { Toaster } from "@/components/ui/sonner";
+import { BatteryStatus } from "@/components/battery-status";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,14 +39,15 @@ export default function RootLayout({
         <SidebarProvider>
       <SidebarLeft />
       <SidebarInset>
-        <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-background">
-          <div className="flex flex-1 items-center gap-2 px-3">
+        <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-background px-3">
+          <div className="flex flex-1 items-center gap-2">
             <SidebarTrigger />
             <Separator
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
           </div>
+          <BatteryStatus />
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {children}
