@@ -3,6 +3,7 @@
 import React from "react";
 import { SujetoVigilancia } from "@/types/types.interface";
 import CardVigilancia from "@/components/CardVigilancia";
+import Formulario from "../componentes/Formulario";
 
 
 type SpeechRecognitionEventType = {
@@ -108,7 +109,7 @@ export default function Vigilancia() {
                     />
                 ))}
             </div>
-
+            <Formulario />
         </div>
     );
 }
