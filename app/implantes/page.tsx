@@ -193,7 +193,7 @@ export default function ImplantesPage() {
                   <Label htmlFor="category" className="text-cyan-400">
                     Categoría
                   </Label>
-                  <Select value={category} onValueChange={(v: any) => setCategory(v)}>
+                  <Select value={category} onValueChange={(value: string) => setCategory(value as "Cyberware" | "Biotech" | "Illegal-Mod")}>
                     <SelectTrigger className="bg-gray-800 border-cyan-600 text-white">
                       <SelectValue />
                     </SelectTrigger>
@@ -209,7 +209,7 @@ export default function ImplantesPage() {
                   <Label htmlFor="riskLevel" className="text-cyan-400">
                     Nivel de Riesgo
                   </Label>
-                  <Select value={riskLevel} onValueChange={(v: any) => setRiskLevel(v)}>
+                  <Select value={riskLevel} onValueChange={(value: string) => setRiskLevel(value as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL")}>
                     <SelectTrigger className="bg-gray-800 border-cyan-600 text-white">
                       <SelectValue />
                     </SelectTrigger>
