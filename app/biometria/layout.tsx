@@ -1,13 +1,12 @@
 
 export default function BiometriaLayout({
- children
+  children,
 }: {
- children: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <div>
-      <h1>Hello Root Layout Biometria</h1>
-      <div>{children}</div>
+    <div className="min-h-screen bg-gray-950 text-white">
+      {children}
     </div>
   );
 }
