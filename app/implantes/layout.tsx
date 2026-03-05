@@ -1,13 +1,11 @@
-
 export default function ImplanteLayout({
- children
+  children
 }: {
- children: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <div>
-      <h1>Hello Root Layout Implante</h1>
-      <div>{children}</div>
+    <div className="bg-black text-gold-400 min-h-screen p-6">
+      {children}
     </div>
   );
 }
