@@ -4,6 +4,7 @@ import "./globals.css";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarLeft } from "@/components/sidebar-left";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,8 +47,8 @@ export default function RootLayout({
           {children}
         </div>
       </SidebarInset>
+    <Toaster />
     </SidebarProvider>
-
       </body>
     </html>
   );
