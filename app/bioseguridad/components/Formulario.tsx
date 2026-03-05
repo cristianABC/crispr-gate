@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ReporteSalud } from "@/types/types.interface";
+import { reportesSanitarios } from "@/mocks/mocks";
 
 type FormValues = {
   patientName: string;
@@ -49,7 +50,9 @@ export default function Formulario() {
       };
 
       contadorId.current++;
+      reportesSanitarios.push(nuevoReporte);
       console.log("Reporte registrado:", nuevoReporte);
+      console.log("Total en mocks:", reportesSanitarios.length);
       setCargando(false);
       setMensajeExito(true);
       reset();
