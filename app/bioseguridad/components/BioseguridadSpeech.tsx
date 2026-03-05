@@ -47,7 +47,7 @@ export default function BioseguridadSpeech() {
                     onClick={escuchando ? detener : iniciar}
                     className={escuchando
                         ? "bg-red-600 text-white px-4 py-2 rounded"
-                        : "text-emerald-500 underline"
+                        : "text-emerald-400 underline px-4 py-2 rounded border border-emerald-400 shadow-[0_0_8px_#34d399,0_0_20px_#34d399] hover:shadow-[0_0_12px_#34d399,0_0_40px_#34d399] transition-shadow duration-300"
                     }
                 >
                     {escuchando ? "ESCANEANDO VOZ..." : "INICIAR DICTADO"}
