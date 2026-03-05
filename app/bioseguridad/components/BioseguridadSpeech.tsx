@@ -1,3 +1,4 @@
+"use client"
 import { useRef, useState } from 'react'
 
 export default function BioseguridadSpeech() {
@@ -31,12 +32,13 @@ export default function BioseguridadSpeech() {
     }
   return (
     <div>
-        <div>
+        <div className='flex justify-center text-purple-500 underline font-bold text-3xl'>
             <button onClick={escuchando? detener : iniciar}>
-                {escuchando? "INICIAR DICTADO" : "ESCANEANDO VOZ..."}
+                {escuchando? "ESCANEANDO VOZ..." : "INICIAR DICTADO"}
             </button>
         </div>
-        <p>{texto}</p>
+        <h1 className='text-2xl font-bold'>Resultado:</h1>
+        <p className=''>{texto}</p>
     </div>
   )
 }
