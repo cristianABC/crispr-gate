@@ -19,7 +19,7 @@ export default function BioseguridadSpeech() {
         const recognition = new Speech();
         recognition.lang = "es-CO";
         recognition.continuous = true
-        recognition.interimresults = false
+        recognition.interimResults = false
 
         // Uso: Captura de datos
         recognition.onresult = (event: any) => {
