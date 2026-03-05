@@ -20,63 +20,65 @@ export default function CrearVista({ registros }: CrearVistaProps) {
           const isUnknownPlanet = r.originPlanet === "Desconocido";
           const isCritical = r.riskLevel === "CRITICAL";
 
+          const dark = isLongTrip;
+
           return (
             <div
               key={r.id}
               className={`rounded-lg border p-4 transition-colors ${
-                isLongTrip
+                dark
                   ? "bg-slate-900 border-cyan-800 hover:border-cyan-500"
-                  : "bg-transparent border-cyan-700/40 hover:border-cyan-400"
+                  : "bg-white border-cyan-700/40 hover:border-cyan-400"
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="font-mono text-xs text-slate-400">#{r.id}</span>
+                <span className={`font-mono text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>#{r.id}</span>
                 <span
                   className={`px-2 py-0.5 rounded text-xs font-bold ${
                     r.riskLevel === "LOW"
-                      ? "bg-green-500/20 text-green-400"
+                      ? "bg-green-500/20 text-green-600"
                       : r.riskLevel === "MEDIUM"
-                      ? "bg-yellow-500/20 text-yellow-400"
+                      ? "bg-yellow-500/20 text-yellow-600"
                       : r.riskLevel === "HIGH"
-                      ? "bg-orange-500/20 text-orange-400"
-                      : "bg-red-500/20 text-red-400"
+                      ? "bg-orange-500/20 text-orange-600"
+                      : "bg-red-500/20 text-red-600"
                   }`}
                 >
                   {r.riskLevel}
                 </span>
               </div>
 
-              <h3 className="text-sm font-semibold text-slate-200 mb-2">
+              <h3 className={`text-sm font-semibold mb-2 ${dark ? "text-slate-200" : "text-slate-800"}`}>
                 {r.travelerName}
               </h3>
 
               <div className="space-y-2 text-sm">
                 <div>
-                  <span className="text-slate-500 text-xs uppercase">Planeta Origen</span>
+                  <span className={`text-xs uppercase ${dark ? "text-slate-500" : "text-slate-400"}`}>Planeta Origen</span>
                   <div>
                     {isUnknownPlanet ? (
-                      <span className="text-yellow-300 font-bold flex items-center gap-1">
+                      <span className="text-yellow-600 font-bold flex items-center gap-1">
                         <HelpCircle className="w-4 h-4" />
                         {r.originPlanet} ?
                       </span>
                     ) : (
-                      <span className="text-slate-300">{r.originPlanet}</span>
+                      <span className={dark ? "text-slate-300" : "text-slate-700"}>{r.originPlanet}</span>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-slate-500 text-xs uppercase">Coordenadas</span>
-                  <div className="font-mono text-xs text-slate-400">
+                  <span className={`text-xs uppercase ${dark ? "text-slate-500" : "text-slate-400"}`}>Coordenadas</span>
+                  <div className={`font-mono text-xs ${dark ? "text-slate-400" : "text-slate-600"}`}>
                     {r.coordinates.lat}, {r.coordinates.lng}
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-slate-500 text-xs uppercase">Nave</span>
+                  <span className={`text-xs uppercase ${dark ? "text-slate-500" : "text-slate-400"}`}>Nave</span>
                   <div>
                     {isCritical ? (
-                      <span className="text-red-500 font-bold flex items-center gap-1 flex-wrap">
+                      <span className="text-red-600 font-bold flex items-center gap-1 flex-wrap">
                         <AlertTriangle className="w-4 h-4" />
                         {r.shipModel}
                         <span className="text-xs bg-red-500/20 border border-red-500 rounded px-1.5 py-0.5">
@@ -84,15 +86,15 @@ export default function CrearVista({ registros }: CrearVistaProps) {
                         </span>
                       </span>
                     ) : (
-                      <span className="text-slate-300">{r.shipModel}</span>
+                      <span className={dark ? "text-slate-300" : "text-slate-700"}>{r.shipModel}</span>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-slate-500 text-xs uppercase">Distancia</span>
+                  <span className={`text-xs uppercase ${dark ? "text-slate-500" : "text-slate-400"}`}>Distancia</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-300">{r.distanceLightYears} ly</span>
+                    <span className={dark ? "text-slate-300" : "text-slate-700"}>{r.distanceLightYears} ly</span>
                     {isLongTrip && (
                       <span className="flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded px-1.5 py-0.5">
                         <Rocket className="w-3 h-3" />
