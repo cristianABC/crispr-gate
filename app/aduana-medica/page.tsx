@@ -1,266 +1,349 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Biohazard } from "lucide-react";
+import * as React from "react";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { CertificadoVacuna } from "@/types/types.interface";
 
-import { certificadosMedicos } from "@/mocks/mocks";
-import { cn } from "@/lib/utils";
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
-type VaccineOption = "" | "N-VIR" | "CRISPR-SHIELD" | "OMEGA-GEN";
-
-const wait = (milliseconds: number) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, milliseconds);
-  });
+function isFutureDateISO(isoDate: string) {
+  if (!isoDate) return false;
+  // comparamos yyyy-mm-dd
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const todayISO = `${yyyy}-${mm}-${dd}`;
+  return isoDate > todayISO;
+}
 
 export default function AduanaMedicaPage() {
-  const [expedientes, setExpedientes] = useState(certificadosMedicos);
-  const [selectedId, setSelectedId] = useState(certificadosMedicos[0]?.id ?? "");
-  const [selectedVaccine, setSelectedVaccine] = useState<VaccineOption>("");
-  const [doseDate, setDoseDate] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [dateError, setDateError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [notificationPermission, setNotificationPermission] = useState<
-    NotificationPermission | "unsupported"
-  >("unsupported");
+  const [data, setData] = React.useState<CertificadoVacuna[]>([]);
+  const [loadingList, setLoadingList] = React.useState(true);
 
-  useEffect(() => {
+  // Notification permission
+  const [notifPermission, setNotifPermission] = React.useState<
+    NotificationPermission | "unsupported"
+  >("default");
+
+  // Form state
+  const [selectedId, setSelectedId] = React.useState<string>("");
+  const [vaccineType, setVaccineType] = React.useState<
+    CertificadoVacuna["vaccineType"] | ""
+  >("");
+  const [doseDate, setDoseDate] = React.useState<string>("");
+
+  const [submitting, setSubmitting] = React.useState(false);
+  const [dateError, setDateError] = React.useState<string>("");
+
+  async function load() {
+    setLoadingList(true);
+    try {
+      const res = await fetch("/api/aduana-medica", { cache: "no-store" });
+      const json = (await res.json()) as CertificadoVacuna[];
+      setData(json);
+    } finally {
+      setLoadingList(false);
+    }
+  }
+
+  React.useEffect(() => {
+    load();
+
+    // detectar soporte + permiso actual
     if (typeof window === "undefined" || !("Notification" in window)) {
-      setNotificationPermission("unsupported");
+      setNotifPermission("unsupported");
       return;
     }
-
-    setNotificationPermission(Notification.permission);
+    setNotifPermission(Notification.permission);
   }, []);
 
-  const selectedExpediente = useMemo(
-    () => expedientes.find((item) => item.id === selectedId),
-    [expedientes, selectedId]
+  const selected = React.useMemo(
+    () => data.find((x) => x.id === selectedId),
+    [data, selectedId]
   );
 
-  const requestNotificationPermission = async () => {
-    if (typeof window === "undefined" || !("Notification" in window)) {
+  async function requestNotifPermission() {
+    if (notifPermission === "unsupported") {
+      toast.error("Tu navegador no soporta Notification API.");
+      return;
+    }
+    const p = await Notification.requestPermission();
+    setNotifPermission(p);
+    if (p === "granted") toast.success("ALERTAS ACTIVAS");
+    else toast.warning("Permiso de alertas no concedido.");
+  }
+
+  function maybeFireMedicalAlertIfNone(cert: CertificadoVacuna) {
+    // Regla: Disparo al intentar registrar a alguien con status 'None'
+    if (cert.status !== "None") return;
+
+    if (notifPermission !== "granted") {
+      // igual avisamos en UI
+      toast.warning("Sujeto sin inmunización (sin permiso de alerta).");
       return;
     }
 
-    const permission = await Notification.requestPermission();
-    setNotificationPermission(permission);
-  };
-
-  const triggerInfringementAlert = (patientName: string) => {
-    if (notificationPermission !== "granted") {
-      return;
-    }
-
-    new Notification("ALERTA DE INFRACCIÓN", {
-      body: `Sujeto no inmunizado detectado: ${patientName}`,
+    // NOTA: usa un icon que exista. Si creas /public/alert-icon.png, cámbialo aquí.
+    new Notification("CRISPR-GATE: ALERTA MÉDICA", {
+      body: "Sujeto sin esquema de vacunación detectado en Aduana.",
+      icon: "/file.svg",
     });
-  };
+  }
 
-  const handleUpdateDose = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSuccessMessage("");
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setDateError("");
 
-    const now = new Date();
-    const enteredDate = new Date(doseDate);
+    if (!selected) {
+      toast.error("Selecciona un expediente.");
+      return;
+    }
+    if (!vaccineType) return; // botón ya debería estar disabled
 
-    if (doseDate && enteredDate > now) {
+    // Validación: fecha futura => error en rojo
+    if (doseDate && isFutureDateISO(doseDate)) {
       setDateError("ERROR: FECHA TEMPORAL INVÁLIDA");
       return;
     }
 
-    setDateError("");
-    setIsLoading(true);
+    // Disparo: si el sujeto está en status None
+    maybeFireMedicalAlertIfNone(selected);
 
-    if (selectedExpediente?.status === "None") {
-      triggerInfringementAlert(selectedExpediente.patientName);
+    // Estado de carga: 1.5s (el POST ya espera 1500ms)
+    setSubmitting(true);
+    toast.loading("Sincronizando Registro Médico...");
+
+    try {
+      const res = await fetch("/api/aduana-medica", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selected.id,
+          vaccineType,
+          lastDose: doseDate || new Date().toISOString().slice(0, 10),
+        }),
+      });
+
+      if (!res.ok) throw new Error("POST failed");
+
+      // Éxito: toast verde + reflejar cambio en lista
+      toast.dismiss();
+      toast.success("CERTIFICADO ACTUALIZADO");
+
+      setData((prev) =>
+        prev.map((c) =>
+          c.id === selected.id
+            ? {
+                ...c,
+                vaccineType: vaccineType as CertificadoVacuna["vaccineType"],
+                lastDose: doseDate || new Date().toISOString().slice(0, 10),
+                status: "Up-to-date",
+              }
+            : c
+        )
+      );
+
+      // reset parcial
+      setDoseDate("");
+      setVaccineType("");
+      setSelectedId("");
+    } catch {
+      toast.dismiss();
+      toast.error("No se pudo actualizar el certificado.");
+    } finally {
+      setSubmitting(false);
     }
-
-    await wait(1500);
-
-    setExpedientes((current) =>
-      current.map((item) => {
-        if (item.id !== selectedId || !selectedVaccine || !doseDate) {
-          return item;
-        }
-
-        return {
-          ...item,
-          vaccineType: selectedVaccine,
-          lastDose: doseDate,
-          status: "Up-to-date",
-        };
-      })
-    );
-
-    setIsLoading(false);
-    setSelectedVaccine("");
-    setDoseDate("");
-    setSuccessMessage("CERTIFICADO ACTUALIZADO");
-    toast.success("CERTIFICADO ACTUALIZADO");
-  };
-
-  const canUpdate = Boolean(selectedVaccine);
+  }
 
   return (
-    <main className="w-full min-h-screen bg-zinc-50 p-6">
-      <section className="mx-auto max-w-5xl space-y-4">
-        <h1 className="text-2xl font-semibold text-zinc-900">
-          Expedientes médicos
+    <div className="w-full space-y-4">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold">
+          Sector 4: Aduana Médica - Control de Inmunización
         </h1>
+        <p className="text-sm text-muted-foreground">
+          Misión: Verificar certificados de vacunación sintética y emitir alertas
+          al sistema central cuando se detecte un sujeto sin protección biológica.
+        </p>
+      </div>
 
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-base font-medium text-zinc-900">
-              Registro de Dosis
-            </h2>
-
-            {notificationPermission === "granted" ? (
-              <button
-                type="button"
-                disabled
-                className="rounded-md border border-zinc-300 bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-600"
-              >
-                ALERTAS ACTIVAS
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={requestNotificationPermission}
-                disabled={notificationPermission === "unsupported"}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                ACTIVAR ALERTAS DE RED
-              </button>
-            )}
-          </div>
-
-          <form onSubmit={handleUpdateDose} className="grid gap-3 md:grid-cols-4">
-            <label className="space-y-1 text-sm text-zinc-700">
-              <span className="font-medium">Viajero</span>
-              <select
-                value={selectedId}
-                onChange={(event) => setSelectedId(event.target.value)}
-                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-              >
-                {expedientes.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.patientName}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1 text-sm text-zinc-700">
-              <span className="font-medium">Tipo de vacuna</span>
-              <select
-                value={selectedVaccine}
-                onChange={(event) =>
-                  setSelectedVaccine(event.target.value as VaccineOption)
-                }
-                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-              >
-                <option value="">Seleccionar</option>
-                <option value="N-VIR">N-VIR</option>
-                <option value="CRISPR-SHIELD">CRISPR-SHIELD</option>
-                <option value="OMEGA-GEN">OMEGA-GEN</option>
-              </select>
-            </label>
-
-            <label className="space-y-1 text-sm text-zinc-700">
-              <span className="font-medium">Fecha</span>
-              <input
-                type="date"
-                value={doseDate}
-                onChange={(event) => setDoseDate(event.target.value)}
-                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-                required
-              />
-            </label>
-
-            <div className="flex items-end">
-              <button
-                type="submit"
-                disabled={!canUpdate || isLoading}
-                className="w-full rounded-md border border-zinc-300 bg-zinc-900 px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isLoading ? "Sincronizando Registro Médico..." : "Actualizar"}
-              </button>
-            </div>
-          </form>
-
-          {dateError && (
-            <p className="mt-3 text-sm font-semibold text-red-600">{dateError}</p>
+      {/* 3) Hardware: Notification permission */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">3. Hardware: Alerta de Infracción</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          {notifPermission === "granted" ? (
+            <Button variant="secondary" disabled>
+              ALERTAS ACTIVAS
+            </Button>
+          ) : (
+            <Button
+              onClick={requestNotifPermission}
+              disabled={notifPermission === "unsupported"}
+            >
+              ACTIVAR ALERTAS DE RED
+            </Button>
           )}
-          {successMessage && (
-            <p className="mt-3 text-sm font-semibold text-green-600">
-              {successMessage}
+          {notifPermission === "unsupported" && (
+            <p className="text-sm text-red-600">
+              Tu navegador no soporta Notification API.
             </p>
           )}
-        </div>
+          <p className="text-xs text-muted-foreground">
+            Disparo: si intentas registrar a alguien con status <b>None</b>, se
+            lanza una notificación real (si hay permiso).
+          </p>
+        </CardContent>
+      </Card>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {expedientes.map((expediente) => {
-            const hasNoStatus = expediente.status === "None";
-            const isCriticalRisk =
-              expediente.riskLevel === "HIGH" ||
-              expediente.riskLevel === "CRITICAL";
-            const isNVirVaccine = expediente.vaccineType === "N-VIR";
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* 1) Visualización */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-base">1. Visualización (Listar)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {loadingList ? (
+              <p className="text-sm text-muted-foreground">Cargando expedientes…</p>
+            ) : (
+              <div className="space-y-3">
+                {data.slice(0, 10).map((c) => {
+                  const dangerNone = c.status === "None";
+                  const nvir = c.vaccineType === "N-VIR";
+                  const highBorder = c.riskLevel === "HIGH" || c.riskLevel === "CRITICAL";
 
-            return (
-              <article
-                key={expediente.id}
-                className={cn(
-                  "rounded-lg border border-zinc-200 bg-white p-4",
-                  hasNoStatus && "bg-red-50",
-                  isCriticalRisk && "border-4 border-double border-red-500"
-                )}
-              >
-                <div className="mb-2 flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs text-zinc-500">{expediente.id}</p>
-                    <h2 className="text-base font-medium text-zinc-900">
-                      {expediente.patientName}
-                    </h2>
-                  </div>
-
-                  {hasNoStatus && (
-                    <div className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-semibold text-red-700">
-                      <Biohazard className="h-3.5 w-3.5" />
-                      PELIGRO BIOLÓGICO
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-1 text-sm text-zinc-700">
-                  <p>
-                    <span className="font-medium">Vacuna:</span>{" "}
-                    <span
-                      className={cn(
-                        isNVirVaccine && "font-bold text-blue-600"
+                  return (
+                    <div
+                      key={c.id}
+                      className={cx(
+                        "rounded-lg border p-3",
+                        dangerNone && "bg-red-50",
+                        highBorder && "border-red-600 border-4 border-double"
                       )}
                     >
-                      {expediente.vaccineType}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-medium">Última dosis:</span>{" "}
-                    {expediente.lastDose}
-                  </p>
-                  <p>
-                    <span className="font-medium">Estado:</span> {expediente.status}
-                  </p>
-                  <p>
-                    <span className="font-medium">Riesgo:</span> {expediente.riskLevel}
-                  </p>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-    </main>
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="text-sm font-semibold">{c.patientName}</div>
+                          <div className="text-xs text-muted-foreground">
+                            ID: {c.id} • Risk: {c.riskLevel} • Status: {c.status}
+                          </div>
+                        </div>
+
+                        {dangerNone && (
+                          <span className="text-xs font-semibold text-red-700">
+                            ☣ PELIGRO BIOLÓGICO
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="mt-2 text-sm">
+                        Vacuna:{" "}
+                        <span
+                          className={cx(
+                            nvir && "font-bold text-blue-600"
+                          )}
+                        >
+                          {c.vaccineType}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {" "}
+                          • Última dosis: {c.lastDose}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 2) Registro de Dosis */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-base">2. Registro de Dosis (Crear)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Expediente</Label>
+                <Select value={selectedId} onValueChange={setSelectedId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un viajero…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {data.slice(0, 10).map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.patientName} ({c.id}) — status: {c.status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tipo de vacuna</Label>
+                <Select
+                  value={vaccineType}
+                  onValueChange={(v) => setVaccineType(v as any)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona vacuna…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="N-VIR">N-VIR</SelectItem>
+                    <SelectItem value="CRISPR-SHIELD">CRISPR-SHIELD</SelectItem>
+                    <SelectItem value="OMEGA-GEN">OMEGA-GEN</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Bloqueo: “Actualizar” queda deshabilitado si no seleccionas vacuna.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Fecha de la dosis (YYYY-MM-DD)</Label>
+                <Input
+                  type="date"
+                  value={doseDate}
+                  onChange={(e) => setDoseDate(e.target.value)}
+                />
+                {dateError && (
+                  <p className="text-sm font-semibold text-red-600">{dateError}</p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={submitting || !vaccineType}
+                className="w-full"
+              >
+                {submitting ? "Sincronizando Registro Médico..." : "Actualizar"}
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                Estado de carga: al registrar, se muestra “Sincronizando…” y se
+                deshabilita el botón ~1.5s.
+              </p>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
