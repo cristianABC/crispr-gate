@@ -1,17 +1,8 @@
-import React from 'react';
-
-// Define the structure for page props if necessary
-interface vigilanciaProps {
-  params: { [key: string]: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
-const NextPage = () => {
+'use client';
+export default function Vigilancia() {
   return (
-    <main>
-      <h1>Página Nueva</h1>
-    </main>
+    <div>
+      <h1>Hello Vigilancia</h1>
+    </div>
   );
-};
-
-export default NextPage;
+}
