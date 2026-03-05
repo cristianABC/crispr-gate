@@ -1,5 +1,4 @@
 import OrigenNav from "./components/OrigenNav";
-
 export default function OrigenLayout({
   children,
 }: {
