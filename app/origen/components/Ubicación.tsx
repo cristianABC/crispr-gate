@@ -12,8 +12,9 @@ export default function Ubicacion(){
 
         if (navigator.geolocation){
             navigator.geolocation.getCurrentPosition(
-                (pos) => {
+                async (pos) => {
                     const { latitude, longitude } = pos.coords;
+                    await new Promise((resolve) => setTimeout(resolve, 1500));
                     setCoords({ latitude, longitude });
                     setEstado("success");
                 },
