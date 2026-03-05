@@ -36,6 +36,7 @@ export default function BioseguridadSpeech() {
                 {escuchando? "INICIAR DICTADO" : "ESCANEANDO VOZ..."}
             </button>
         </div>
+        <p>{texto}</p>
     </div>
   )
 }
