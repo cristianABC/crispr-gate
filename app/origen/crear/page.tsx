@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -71,8 +71,7 @@ function GpsPanel() {
 
 // ── Formulario ─────────────────────────────────────────────────────────────
 export default function CrearPage() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const form = useForm<RutaViajeroFormInput, object, RutaViajeroForm>({
@@ -99,7 +98,8 @@ export default function CrearPage() {
         body: JSON.stringify(data),
       })
       if (!res.ok) throw new Error('Error al crear el registro')
-      router.push('/origen')
+      toast.success('PLAN DE VUELO AUTORIZADO', { style: { color: 'green' } })
+      form.reset()
     } catch {
       setError('No se pudo crear el registro. Intenta de nuevo.')
       setIsSubmitting(false)
