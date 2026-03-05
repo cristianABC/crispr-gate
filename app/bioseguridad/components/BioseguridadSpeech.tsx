@@ -32,7 +32,7 @@ export default function BioseguridadSpeech() {
     }
   return (
     <div>
-        <div className='flex justify-center text-purple-500 underline font-bold text-3xl'>
+        <div className='flex justify-center text-emerald-500 underline font-mono text-4xl'>
             <button onClick={escuchando? detener : iniciar}>
                 {escuchando? "ESCANEANDO VOZ..." : "INICIAR DICTADO"}
             </button>
