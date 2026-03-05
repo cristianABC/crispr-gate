@@ -1,4 +1,4 @@
-
+import NavBar from "./components/NavBar"
 export default function BioseguridadLayout({
  children
 }: {
@@ -6,7 +6,7 @@ export default function BioseguridadLayout({
 }) {
   return (
     <div>
-      <h1>Hello Root Layout Bioseguridad</h1>
+      <NavBar></NavBar>
       <div>{children}</div>
     </div>
   );

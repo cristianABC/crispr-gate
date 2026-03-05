@@ -4,7 +4,12 @@ import Link from "next/link";
 
 export default function Name() {
   return (
-    <header>
+    <header 
+    style = {{
+      backgroundColor: "#f7c14ed9",
+      fontSize : 20,
+
+    }}>
       <br />
 
       <hr
@@ -12,7 +17,8 @@ export default function Name() {
           border: 0,
           height: "1px",
           width: "100%",
-          margin: 0, // elimina separación automática
+          margin: 0,
+          color: "#b12c2c",
         }}
       />
 
@@ -22,27 +28,35 @@ export default function Name() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "0.2rem",
-          margin: 0, // elimina separación extra
+          margin: 0,
         }}
       >
-        <div style = {{display: "flex", alignItems: "center", gap: "0.5rem"}}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <img
+            src = "https://porcinews.com/wp-content/uploads/2021/09/bioseguridad.png"
+            alt="Logo"
+            style={{ width: "50px", height: "50px" }}
+          />
 
-        <img
-          src="https://png.pngtree.com/png-vector/20250518/ourmid/pngtree-a-green-crescent-symbol-shines-bright-cultural-pride-glows-in-peace-png-image_16308606.png"
-          alt="Logo de la Estación Espacial Alpha"
-          style={{ width: "50px", height: "50px" }}
-          /> 
+          <h1 style={{ margin: 0 , font:"Arial" }}>BIOSEGURIDAD</h1>
+        </div>
 
-        <h1 style={{ margin: 0 }}>
-          Estacion Espacial Alpha
-        </h1>
-          </div>
-
-        <nav style={{ display: "flex", gap: "0.5rem" }}>
-          <Link href="/tripulantes" style = {{}}>Tripulantes</Link>
-          <Link href="/monitoreo">Monitoreo</Link>
+        <nav className = "underline pr-5 " style={{ display: "flex", gap: "0.5rem" , color : "#0e25d7",justifyContent: "space-between" }}>
+          <Link href="/bioseguridad/crear" style={{}}>
+            CREAR
+          </Link>
+          <Link href="/bioseguridad/listarCarpeta">LISTADO</Link>
         </nav>
       </div>
+      <hr
+        style={{
+          border: 0,
+          height: "1px",
+          width: "100%",
+          margin: 0,
+          color: "#b12c2c",
+        }}
+      />
     </header>
   );
 }
