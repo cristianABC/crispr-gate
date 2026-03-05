@@ -14,4 +14,5 @@ export const rutaViajeroSchema = z.object({
 })
 
 export type RutaViajeroForm = z.infer<typeof rutaViajeroSchema>
+export type RutaViajeroFormInput = z.input<typeof rutaViajeroSchema>
 export type RutaViajeroInput = Omit<RutaViajero, 'id'>

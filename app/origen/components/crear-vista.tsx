@@ -1,7 +1,6 @@
 "use client";
 
 import { RutaViajero } from "@/types/types.interface";
-import { Rocket, AlertTriangle, HelpCircle } from "lucide-react";
 
 interface CrearVistaProps {
   registros: RutaViajero[];
@@ -46,8 +45,7 @@ export default function CrearVista({ registros }: CrearVistaProps) {
                   <td className="px-4 py-3">{r.travelerName}</td>
                   <td className="px-4 py-3">
                     {isUnknownPlanet ? (
-                      <span className="text-yellow-300 font-bold flex items-center gap-1">
-                        <HelpCircle className="w-4 h-4" />
+                      <span className="text-yellow-300 font-bold">
                         {r.originPlanet} ?
                       </span>
                     ) : (
@@ -59,10 +57,9 @@ export default function CrearVista({ registros }: CrearVistaProps) {
                   </td>
                   <td className="px-4 py-3">
                     {isCritical ? (
-                      <span className="text-red-500 font-bold flex items-center gap-1">
-                        <AlertTriangle className="w-4 h-4" />
-                        {r.shipModel}
-                        <span className="ml-1 text-xs bg-red-500/20 border border-red-500 rounded px-1.5 py-0.5">
+                      <span className="text-red-500 font-bold">
+                        {r.shipModel}{" "}
+                        <span className="text-xs bg-red-500/20 border border-red-500 rounded px-1.5 py-0.5">
                           INSPECCIÓN REQUERIDA
                         </span>
                       </span>
@@ -86,11 +83,10 @@ export default function CrearVista({ registros }: CrearVistaProps) {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="flex items-center gap-2">
+                    <span>
                       {r.distanceLightYears}
                       {isLongTrip && (
-                        <span className="flex items-center gap-1 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded px-1.5 py-0.5">
-                          <Rocket className="w-3 h-3" />
+                        <span className="ml-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded px-1.5 py-0.5">
                           VIAJE LARGO
                         </span>
                       )}
