@@ -13,7 +13,6 @@ export default function BioseguridadSpeech() {
     const iniciar = () => {
         if (!soportaAPI()) return;
 
-        // Inicialización (Verificar compatibilidad con prefijos)
         const Speech = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         
         const recognition = new Speech();
@@ -21,10 +20,10 @@ export default function BioseguridadSpeech() {
         recognition.continuous = true
         recognition.interimResults = false
 
-        // Uso: Captura de datos
         recognition.onresult = (event: any) => {
-        const resultado = event.results[0][0].transcript;
-        setTexto(resultado);
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                setTexto(prev => prev + event.results[i][0].transcript);
+            }
         };
 
         recognition.start()
@@ -40,11 +39,17 @@ export default function BioseguridadSpeech() {
     const haysoporte = typeof window !== "undefined" && soportaAPI();
   return (
     <div>
-        <div className='flex justify-center text-emerald-500 underline font-mono text-4xl'>
+        <div className='flex justify-center font-mono text-4xl'>
             {!haysoporte ? (
-                <p className="text-red-500 no-underline">HARDWARE DE VOZ NO DETECTADO</p>
+                <p className="text-red-500">HARDWARE DE VOZ NO DETECTADO</p>
             ) : (
-                <button onClick={escuchando ? detener : iniciar}>
+                <button
+                    onClick={escuchando ? detener : iniciar}
+                    className={escuchando
+                        ? "bg-red-600 text-white px-4 py-2 rounded"
+                        : "text-emerald-500 underline"
+                    }
+                >
                     {escuchando ? "ESCANEANDO VOZ..." : "INICIAR DICTADO"}
                 </button>
             )}
