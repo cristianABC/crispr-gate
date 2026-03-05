@@ -13,8 +13,8 @@ export default function Formulario() {
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
     defaultValues: {
       nombre_infractor: "Nombre del infractor ",
-      nueva_infraccion: "Descripción de la infracción...",
-      comentarios: "Comentarios del agente...",
+      nueva_infraccion: "",
+      comentarios: "",
     }
   });
 
@@ -30,7 +30,7 @@ export default function Formulario() {
     <form onSubmit={handleSubmit(alEnviar)} className="space-y-4">
       {/* NOMBRE INFRACTOR */}
       <div>
-        <label className="text-xs font-mono text-emerald-500">ID sujeto infractor</label>
+        <label className="text-xs font-mono text-black-500">ID sujeto infractor</label>
         <input 
           type="text" 
           {...register("nombre_infractor")} 
@@ -65,9 +65,23 @@ export default function Formulario() {
       </div>
 
       {/* BOTÓN DE ACCIÓN */}
-      <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-bold py-2 rounded uppercase text-xs tracking-widest transition-all">
-        Sincronizar Registros
+      <button 
+        type="submit"
+        disabled={isSubmitting || !isWanted}
+        className={`w-full font-bold py-2 rounded uppercase text-xs tracking-widest transition-all ${
+          isSubmitting || !isWanted 
+            ? "bg-zinc-800 text-zinc-500 cursor-not-allowed" 
+            : "bg-emerald-600 hover:bg-emerald-500 text-black"
+        }`}
+      >
+        {isSubmitting ? "Actualizando Historial Criminal..." : "Sincronizar Registros"}
       </button>
+
+      {!isWanted && (
+        <p className="text-center text-[10px] text-amber-500 font-mono">
+          ACCESO DENEGADO: SIN ORDEN DE CAPTURA ACTIVA
+        </p>
+      )}
     </form>
   );
   }
