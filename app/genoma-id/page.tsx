@@ -7,7 +7,7 @@ import LabRecordCard from "./components/lab-record-card";
 export default function GenomaIdPage() {
     const [labRecords, setLabRecords] = useState<ViajeroIdentidad[]>([]);
     
-        const setLabData = useEffectEvent((data) => {
+        const setLabData = useEffectEvent((data: ViajeroIdentidad[]) => {
             setLabRecords(data);
         })
     
