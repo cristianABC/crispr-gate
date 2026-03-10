@@ -26,7 +26,7 @@ export function NavFavorites({
         {favorites.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-            <Link href={item.url}>
+            <Link href={`/${item.url}`}>
                 <span>{item.emoji}</span>
                 <span>{item.name}</span>
             </Link>
