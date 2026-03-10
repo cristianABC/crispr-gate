@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
+import Listar from "./listarCarpeta/Listar";
 
 export default function NamePage() {
-  redirect("/listarCarpeta");
+  return (
+    <div>
+      <Listar></Listar>
+    </div>
+  );
 }
